@@ -1,4 +1,4 @@
-#include <libhmap.h>
+#include <libhmap/libhmap.h>
 #include <stdio.h>
 
 int main() {

@@ -10,7 +10,7 @@ For installation, please go [here](#installation). For documentation, please go 
 The shown below is a tl;dr version. Proper instructions are [here](#step-1)
 
 ```c
-#include <libhmap.h>
+#include <libhmap/libhmap.h>
 #include <stdio.h>
 
 int main() {
@@ -36,7 +36,7 @@ $ ./test.o
 Import the library:
 
 ```c
-#include <libhmap.h>
+#include <libhmap/libhmap.h>
 ```
 
 **NOTE**: Link the library when compiling
