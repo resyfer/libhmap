@@ -1,8 +1,8 @@
-#include <sys/types.h>
-#include <stdbool.h>
-
 #ifndef __LIBHMAP_H
 #define __LIBHMAP_H
+
+#include <sys/types.h>
+#include <stdbool.h>
 
 struct __hmap_node {
 	struct __hmap_node* prev;
