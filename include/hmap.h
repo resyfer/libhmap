@@ -33,7 +33,7 @@ typedef struct {
 
 #define __HMAP_DEFAULT_CAP 25
 
-hmap_t* hmap_new();
+hmap_t* hmap_new(void);
 hmap_t* hmap_new_cap(u_int8_t cap);
 
 void* hmap_get(hmap_t *hmap, const char *key);

@@ -29,7 +29,7 @@ hmap_new_cap(u_int8_t cap)
 }
 
 hmap_t*
-hmap_new()
+hmap_new(void)
 {
 	return hmap_new_cap(__HMAP_DEFAULT_CAP);
 }
