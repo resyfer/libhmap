@@ -1,20 +1,24 @@
-#include <libhmap/libhmap.h>
+#include <libhmap/hmap.h>
 #include <stdio.h>
 
 int main() {
-	struct map *my_map = new_map();
+	hmap_t *my_map = hmap_new();
 
-	map_push(my_map, "hello", "world");
-	printf("%s: %s\n", "hello", map_get(my_map, "hello"));
+	hmap_push(my_map, "hello", (void*) "world");
+	printf("%s: %s\n", "hello", (char *) hmap_get(my_map, "hello"));
 
-	struct map_itr *itr = new_map_itr(my_map);
-	struct node *elem;
+	int a = 10;
+	hmap_push(my_map, "foo", (void*) &a);
+	printf("%s: %d\n", "foo", *(int *) hmap_get(my_map, "foo"));
 
-	while((elem = itr_adv(itr)) != NULL) {
-		printf("%s\n", elem->value);
+	hmap_itr_t *itr = hmap_itr_new(my_map);
+	hmap_node_t *elem;
+
+	while((elem = hmap_itr_adv(itr)) != NULL) {
+		printf("%p\n", (char *) elem->value);
 	}
 
-	free_map(my_map);
+	hmap_free(my_map);
 
 	return 0;
 }

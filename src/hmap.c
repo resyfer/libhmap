@@ -3,19 +3,19 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include <include/libhmap.h>
+#include <include/hmap.h>
 
-struct map*
-new_map_cap(u_int8_t cap)
+hmap_t*
+hmap_new_cap(u_int8_t cap)
 {
-	struct map *new_map = malloc(sizeof(struct map));
+	hmap_t *new_map = malloc(sizeof(hmap_t));
 	if(!new_map) {
 		printf("Allocation Problem\n");
 		exit(1);
 	}
-	memset(new_map, 0, sizeof(struct map));
+	memset(new_map, 0, sizeof(hmap_t));
 
-	struct node **map_arr = calloc(cap, sizeof(struct node*));
+	hmap_node_t **map_arr = calloc(cap, sizeof(hmap_node_t*));
 	if(!map_arr) {
 		printf("Allocation Problem\n");
 		exit(1);
@@ -28,10 +28,10 @@ new_map_cap(u_int8_t cap)
 	return new_map;
 }
 
-struct map*
-new_map()
+hmap_t*
+hmap_new()
 {
-	return new_map_cap(DEFAULT_CAP);
+	return hmap_new_cap(__HMAP_DEFAULT_CAP);
 }
 
 int
@@ -46,12 +46,12 @@ hash_key(const char *key, u_int8_t cap)
 }
 
 /* Map Methods */
-struct node*
-find_node(struct node* head, const char *key)
+hmap_node_t*
+find_node(hmap_node_t* head, const char *key)
 {
 	int n = strlen(key);
 
-	struct node *temp = head;
+	hmap_node_t *temp = head;
 	while(temp) {
 		if(!strncmp(key, temp->key, n)) {
 			return temp;
@@ -62,11 +62,11 @@ find_node(struct node* head, const char *key)
 	return NULL;
 }
 
-char *
-map_get(struct map *map, const char *key)
+void *
+hmap_get(hmap_t *hmap, const char *key)
 {
-	int index = hash_key(key, map->cap);
-	struct node *elem = find_node(map->arr[index], key);
+	int index = hash_key(key, hmap->cap);
+	hmap_node_t *elem = find_node(hmap->arr[index], key);
 
 	if(!elem) {
 		return NULL;
@@ -75,67 +75,58 @@ map_get(struct map *map, const char *key)
 }
 
 void
-map_push(struct map *map, const char *key, const char *value)
+hmap_push(hmap_t *hmap, const char *key, void *value)
 {
-	if(!map) {
+	if(!hmap) {
 		return;
 	}
 
-	int index = hash_key(key, map->cap);
-	struct node *elem = find_node(map->arr[index], key);
+	int index = hash_key(key, hmap->cap);
+	hmap_node_t *elem = find_node(hmap->arr[index], key);
 
 	if(elem) {
 		free(elem->value);
-		char *new_val = malloc(sizeof(char) * (strlen(value) + 1));
-		strcpy(new_val, value);
-		elem->value = new_val;
+		elem->value = value;
 	} else {
-		struct node *new_node = malloc(sizeof(struct node));
+		hmap_node_t *new_node = malloc(sizeof(hmap_node_t));
+		if(!new_node) {
+			printf("Allocation Problem\n");
+			exit(1);
+		}
 		new_node->prev = NULL;
 
-		new_node->key = malloc(sizeof(char) * (strlen(key) + 1));
-		if(!new_node) {
-			printf("Allocation Problem\n");
-			exit(1);
-		}
-		strcpy(new_node->key, key);
-
-		new_node->value = malloc(sizeof(char) * (strlen(value) + 1));
-		if(!new_node) {
-			printf("Allocation Problem\n");
-			exit(1);
-		}
-		strcpy(new_node->value, value);
+		new_node->key = (char *) key;
+		new_node->value = value;
 
 		// Inserting new_node at start of doubly linked list at arr[index]
-		new_node->next = map->arr[index];
-		if(map->arr[index]) {
-			map->arr[index]->prev = new_node;
+		new_node->next = hmap->arr[index];
+		if(hmap->arr[index]) {
+			hmap->arr[index]->prev = new_node;
 		}
-		map->arr[index] = new_node;
-		map->size++;
+		hmap->arr[index] = new_node;
+		hmap->size++;
 	}
 }
 
 void
-map_remove(struct map *map, const char *key)
+hmap_remove(hmap_t *hmap, const char *key)
 {
-	int index = hash_key(key, map->cap);
-	struct node *elem = find_node(map->arr[index], key);
+	int index = hash_key(key, hmap->cap);
+	hmap_node_t *elem = find_node(hmap->arr[index], key);
 
 	if(!elem) {
 		return;
 	}
 
-	if(map->arr[index] == elem) {
-		map->arr[index] = elem->next;
+	if(hmap->arr[index] == elem) {
+		hmap->arr[index] = elem->next;
 	} else {
-		struct node *prev = elem->prev, *next = elem->next;
+		hmap_node_t *prev = elem->prev, *next = elem->next;
 		prev->next = next;
 		next->prev = prev;
 	}
 
-	map->size--;
+	hmap->size--;
 
 	free(elem->key);
 	free(elem->value);
@@ -143,16 +134,16 @@ map_remove(struct map *map, const char *key)
 }
 
 bool
-map_empty(struct map *map)
+hmap_empty(hmap_t *hmap)
 {
-	return map->size == 0;
+	return hmap->size == 0;
 }
 
 /* Map Free */
 void
-node_free(struct node* head)
+hmap_node_free(hmap_node_t* head)
 {
-	struct node* temp;
+	hmap_node_t* temp;
 	while(head) {
 		temp = head;
 		head = head->next;
@@ -161,21 +152,21 @@ node_free(struct node* head)
 }
 
 void
-free_map(struct map *map)
+hmap_free(hmap_t *hmap)
 {
-	for(int i = 0; i<map->cap; i++) {
-		node_free(map->arr[i]);
-		map->arr[i] = NULL;
+	for(int i = 0; i<hmap->cap; i++) {
+		hmap_node_free(hmap->arr[i]);
+		hmap->arr[i] = NULL;
 	}
-	free(map);
+	free(hmap);
 }
 
 /* Iterator */
-struct node*
-itr_adv(struct map_itr *itr)
+hmap_node_t*
+hmap_itr_adv(hmap_itr_t *itr)
 {
 	// Empty Map or Iterator
-	if(!itr || map_empty(itr->map)) {
+	if(!itr || hmap_empty(itr->map)) {
 		return NULL;
 	}
 
@@ -203,7 +194,7 @@ itr_adv(struct map_itr *itr)
 	if(itr->last && !itr->last->next) {
 		itr->index++;
 		itr->last = NULL;
-		return itr_adv(itr);
+		return hmap_itr_adv(itr);
 	}
 
 	// Linked List Traversal
@@ -215,7 +206,7 @@ itr_adv(struct map_itr *itr)
 	// New index in arr & it is empty & it is not last index
 	if(!itr->last && !itr->map->arr[itr->index]) {
 		itr->index++;
-		return itr_adv(itr);
+		return hmap_itr_adv(itr);
 	}
 
 	// New non-empty index in arr
@@ -227,16 +218,16 @@ itr_adv(struct map_itr *itr)
 
 // TODO: itr_prev, and a better logic for itr_adv
 
-struct map_itr*
-new_map_itr(struct map *map)
+hmap_itr_t*
+hmap_itr_new(hmap_t *hmap)
 {
-	if(!map) {
+	if(!hmap) {
 		return NULL;
 	}
 
-	struct map_itr *itr = malloc(sizeof(struct map_itr));
-	itr->index = map->cap; // Setting it as cap to signify no assignment of itr
-	itr->map = map;
+	hmap_itr_t *itr = malloc(sizeof(hmap_itr_t));
+	itr->index = hmap->cap; // Setting it as cap to signify no assignment of itr
+	itr->map = hmap;
 	itr->last = NULL;
 
 	return itr;
@@ -244,20 +235,20 @@ new_map_itr(struct map *map)
 
 /* Print */
 void
-print_node(struct node *head)
+hmap_print_node(hmap_node_t *head)
 {
-	struct node* temp = head;
+	hmap_node_t* temp = head;
 	while(temp) {
-		printf("(%s:%s)->", temp->key, temp->value);
+		printf("(%s:%p)->", temp->key, temp->value);
 		temp = temp->next;
 	}
 	printf("N\n");
 }
 
 void
-print_map(struct map *map)
+hmap_print(hmap_t *hmap)
 {
-	for(int i = 0; i<map->cap; i++) {
-		print_node(map->arr[i]);
+	for(int i = 0; i<hmap->cap; i++) {
+		hmap_print_node(hmap->arr[i]);
 	}
 }

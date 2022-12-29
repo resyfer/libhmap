@@ -10,17 +10,29 @@ For installation, please go [here](#installation). For documentation, please go 
 The shown below is a tl;dr version. Proper instructions are [here](#step-1)
 
 ```c
-#include <libhmap/libhmap.h>
+#include <libhmap/hmap.h>
 #include <stdio.h>
 
 int main() {
-  struct map *my_map = new_map();
+	hmap_t *my_map = hmap_new();
 
-  map_push(my_map, "hello", "world");
-  printf("%s : %s\n", "hello", map_get(my_map, "hello"));
+	hmap_push(my_map, "hello", (void*) "world");
+	printf("%s: %s\n", "hello", (char *) hmap_get(my_map, "hello"));
 
-  free_map(my_map);
-  return 0;
+	int a = 10;
+	hmap_push(my_map, "foo", (void*) &a);
+	printf("%s: %d\n", "foo", *(int *) hmap_get(my_map, "foo"));
+
+	hmap_itr_t *itr = hmap_itr_new(my_map);
+	hmap_node_t *elem;
+
+	while((elem = hmap_itr_adv(itr)) != NULL) {
+		printf("%p\n", (char *) elem->value);
+	}
+
+	hmap_free(my_map);
+
+	return 0;
 }
 ```
 
@@ -36,7 +48,7 @@ $ ./test.o
 Import the library:
 
 ```c
-#include <libhmap/libhmap.h>
+#include <libhmap/hmap.h>
 ```
 
 **NOTE**: Link the library when compiling
@@ -50,7 +62,7 @@ $ gcc a.c -o a.o -lhmap
 Initialize a hash map:
 
 ```c
-struct map *my_map = new_map();
+hmap_t *my_map = hmap_new();
 ```
 
 This will create a hash map with default size of internal array (which is set at 25 currently).
@@ -58,7 +70,7 @@ This will create a hash map with default size of internal array (which is set at
 To create a smaller internal array, say, of size 10:
 
 ```c
-struct map *my_map = new_map_cap(10);
+hmap_t *my_map = hmap_new_cap(10);
 ```
 
 **NOTE**: This does not decrease the number of elements the hash map can hold, which honestly depends on the memory you have. It just sets the internal array to smaller size.
@@ -68,7 +80,9 @@ struct map *my_map = new_map_cap(10);
 To push:
 
 ```c
-map_push(my_map, "hello", "world");
+hmap_push(my_map, "hello", (void*) "world");
+//or
+hmap_push(my_map, "foo", (void*) &my_number);
 ```
 
 **NOTE**: If the same key is more than once,
@@ -77,31 +91,20 @@ the latest push for it will overide the value.
 To get the value of a key:
 
 ```c
-char *val = map_get(my_map, "hello");
+char *val = hmap_get(my_map, "hello");
+//or
+int *num = hmap_get(my_map, "foo");
 ```
 
-For keys and values you may use string literals,
-strings as characters arrays, and even dynamically allocated string
-for both `map_push` and `map_get`.
-
-**NOTE**: Any strings passed are copied into the hash map,
-so please free up any dynamically allocated strings you may have used eg:
-
-```c
-char *var = malloc(5 * sizeof(char));
-char *k = map_get(my_map, var);
-free(var);
-```
+**NOTE**: None of the values are copied into the hash map so memory management is left to the user for these, even after `hmap_free`.
 
 ### Step 4
 
 Free up the hash map's allocated memory after use:
 
 ```c
-free_map(my_map);
+hmap_free(my_map);
 ```
-
-**NOTE**: Any strings stored from `map_get` are dangling pointers after `free_map`.
 
 ## Installation
 
@@ -122,41 +125,41 @@ Provide the password when prompted.
 ### Initialize
 
 ```c
-struct map* new_map();
-struct map* new_map_cap(u_int8_t cap);
+hmap_t* hmap_new();
+hmap_t* hmap_new_cap(u_int8_t cap);
 ```
 
 ### Create-Read-Update-Delete
 
 ```c
-char* map_get(struct map *map, const char *key); // Read
-void map_push(struct map *map, const char *key, const char *value); // Create, Update
-void map_remove(struct map *map, const char *key); // Delete
+void* hmap_get(hmap_t *hmap, const char *key); // Read
+void hmap_push(hmap_t *hmap, const char *key, void *value); // Create, Update
+void hmap_remove(hmap_t *hmap, const char *key); // Delete
 ```
 
 ### Iterator
 
-Iterates lazily over all the elements currently present in
+Iterator iterates lazily over all the elements currently present in
 the hash map (this does not include `NULL` elements in
 underlying data structure)
 
 #### Create
 
 ```c
-struct map_itr* new_map_itr(struct map *map);
+hmap_itr_t* hmap_itr_new(hmap_t *hmap);
 ```
 
 #### Advance by 1
 
 ```c
-struct node* itr_adv(struct map_itr *itr);
+hmap_node_t* hmap_itr_adv(hmap_itr_t *itr);
 ```
 
 #### Example
 
 ```c
-struct map_itr *itr = new_map_itr(my_map);
-struct node *elem;
+hmap_itr_t *itr = hmap_itr_new(my_map);
+hmap_node_t *elem;
 
 while((elem = itr_adv(itr)) != NULL) {
   printf("%s: %s\n", elem->key, elem->value);
@@ -166,15 +169,15 @@ while((elem = itr_adv(itr)) != NULL) {
 
 ### Free
 
-**Please free your hash maps after use to prevent memory leaks.**
+Freeing up hash map.
 
 ```c
-void free_map(struct map *map);
+void hmap_free(hmap_t *hmap);
 ```
 
 ### Misc
 
 ```c
-bool map_empty(struct map *map); // True if map is empty (ie. no elements)
-void print_map(struct map *map); // Outputs the whole internal data structure in a visual form
+bool hmap_empty(hmap_t *hmap); // True if map is empty (ie. no elements)
+void hmap_print(hmap_t *hmap); // Outputs the whole internal data structure in a visual form
 ```
