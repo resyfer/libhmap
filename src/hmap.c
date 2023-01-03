@@ -237,10 +237,6 @@ hmap_itr_new(hmap_t *hmap)
 void
 hmap_print_node(hmap_node_t *head)
 {
-	if(!head) {
-		return;
-	}
-
 	hmap_node_t* temp = head;
 	while(temp) {
 		printf("(%s:%p)->", temp->key, temp->value);
@@ -252,6 +248,10 @@ hmap_print_node(hmap_node_t *head)
 void
 hmap_print(hmap_t *hmap)
 {
+	if(!hmap) {
+		return;
+	}
+
 	for(int i = 0; i<hmap->cap; i++) {
 		hmap_print_node(hmap->arr[i]);
 	}
