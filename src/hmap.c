@@ -55,7 +55,7 @@ hmap_node_t*
 find_node(hmap_node_t* head, const char *key)
 {
 	if(!head) {
-		return;
+		return NULL;
 	}
 
 	int n = strlen(key);
