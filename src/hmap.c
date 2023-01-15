@@ -38,17 +38,26 @@ int
 hash_key(const char *key, u_int8_t cap)
 {
 	int hash = 0;
+
 	for(int i = 0; key[i] != 0; i++) {
-		hash += (key[i] % cap);
+	// 	hash += (key[i] % cap);
+		hash += (key[i] * key[i]);
+
+		if(hash <= cap) {
+			hash%=cap;
+		}
 	}
-	hash %= cap;
-	return hash;
+	return hash % cap;
 }
 
 /* Map Methods */
 hmap_node_t*
 find_node(hmap_node_t* head, const char *key)
 {
+	if(!head) {
+		return;
+	}
+
 	int n = strlen(key);
 
 	hmap_node_t *temp = head;
@@ -65,6 +74,10 @@ find_node(hmap_node_t* head, const char *key)
 void *
 hmap_get(hmap_t *hmap, const char *key)
 {
+	if(!hmap || !key) {
+		return NULL;
+	}
+
 	int index = hash_key(key, hmap->cap);
 	hmap_node_t *elem = find_node(hmap->arr[index], key);
 
@@ -154,6 +167,10 @@ hmap_node_free(hmap_node_t* head)
 void
 hmap_free(hmap_t *hmap)
 {
+	if(!hmap) {
+		return;
+	}
+
 	for(int i = 0; i<hmap->cap; i++) {
 		hmap_node_free(hmap->arr[i]);
 		hmap->arr[i] = NULL;
