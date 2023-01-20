@@ -5,33 +5,24 @@
 
 #include <include/hmap.h>
 
-hmap_t*
-hmap_new_cap(u_int8_t cap)
+/**
+ * @brief The default cap for a hash map.
+ */
+#define __HMAP_DEFAULT_CAP 20
+
+void
+hmap_new_cap(hmap_t *hmap, u_int8_t cap)
 {
-	hmap_t *new_map = malloc(sizeof(hmap_t));
-	if(!new_map) {
-		printf("Allocation Problem\n");
-		exit(1);
-	}
-	memset(new_map, 0, sizeof(hmap_t));
-
 	hmap_node_t **map_arr = calloc(cap, sizeof(hmap_node_t*));
-	if(!map_arr) {
-		printf("Allocation Problem\n");
-		exit(1);
-	}
-
-	new_map->arr = map_arr;
-	new_map->cap = cap;
-	new_map->size = 0;
-
-	return new_map;
+	hmap->arr = map_arr;
+	hmap->cap = cap;
+	hmap->size = 0;
 }
 
-hmap_t*
-hmap_new(void)
+void
+hmap_new(hmap_t *hmap)
 {
-	return hmap_new_cap(__HMAP_DEFAULT_CAP);
+	return hmap_new_cap(hmap, __HMAP_DEFAULT_CAP);
 }
 
 int
@@ -41,81 +32,66 @@ hash_key(const char *key, u_int8_t cap)
 
 	for(int i = 0; key[i] != 0; i++) {
 	// 	hash += (key[i] % cap);
-		hash += (key[i] * key[i]);
+		hash += (key[i] * key[i]) + i;
 
 		if(hash <= cap) {
 			hash%=cap;
 		}
 	}
+
 	return hash % cap;
 }
 
 /* Map Methods */
+
 hmap_node_t*
-find_node(hmap_node_t* head, const char *key)
+find_node(hmap_node_t* head, const char *key,
+			bool need_prev, hmap_node_t** prev)
 {
-	if(!head) {
-		return NULL;
+	hmap_node_t *temp = head;
+	if(need_prev) {
+		*prev = NULL;
 	}
 
-	int n = strlen(key);
-
-	hmap_node_t *temp = head;
 	while(temp) {
-		if(!strncmp(key, temp->key, n)) {
+		if(!strcmp(key, temp->key)) {
 			return temp;
 		}
+
+		if(need_prev) {
+			*prev = temp;
+		}
+
 		temp = temp->next;
 	}
 
 	return NULL;
 }
 
-void *
+void*
 hmap_get(hmap_t *hmap, const char *key)
 {
-	if(!hmap || !key) {
-		return NULL;
-	}
-
 	int index = hash_key(key, hmap->cap);
-	hmap_node_t *elem = find_node(hmap->arr[index], key);
+	hmap_node_t *elem = find_node(hmap->arr[index], key, false, NULL);
 
-	if(!elem) {
-		return NULL;
-	}
-	return elem->value;
+	return (elem) ? elem->value : NULL;
 }
 
 void
 hmap_push(hmap_t *hmap, const char *key, void *value)
 {
-	if(!hmap) {
-		return;
-	}
-
 	int index = hash_key(key, hmap->cap);
-	hmap_node_t *elem = find_node(hmap->arr[index], key);
+	hmap_node_t *elem = find_node(hmap->arr[index], key, false, NULL);
 
 	if(elem) {
-		free(elem->value);
 		elem->value = value;
 	} else {
 		hmap_node_t *new_node = malloc(sizeof(hmap_node_t));
-		if(!new_node) {
-			printf("Allocation Problem\n");
-			exit(1);
-		}
-		new_node->prev = NULL;
-
 		new_node->key = (char *) key;
 		new_node->value = value;
 
 		// Inserting new_node at start of doubly linked list at arr[index]
 		new_node->next = hmap->arr[index];
-		if(hmap->arr[index]) {
-			hmap->arr[index]->prev = new_node;
-		}
 		hmap->arr[index] = new_node;
 		hmap->size++;
 	}
@@ -125,24 +101,22 @@ void
 hmap_remove(hmap_t *hmap, const char *key)
 {
 	int index = hash_key(key, hmap->cap);
-	hmap_node_t *elem = find_node(hmap->arr[index], key);
+
+	hmap_node_t *prev;
+	hmap_node_t *elem = find_node(hmap->arr[index], key, true, &prev);
 
 	if(!elem) {
 		return;
 	}
 
-	if(hmap->arr[index] == elem) {
+	if(hmap->arr[index] == elem /* || !prev */) {
 		hmap->arr[index] = elem->next;
 	} else {
-		hmap_node_t *prev = elem->prev, *next = elem->next;
-		prev->next = next;
-		next->prev = prev;
+		prev->next = prev->next->next;
 	}
 
 	hmap->size--;
 
-	free(elem->key);
-	free(elem->value);
 	free(elem);
 }
 
@@ -153,6 +127,7 @@ hmap_empty(hmap_t *hmap)
 }
 
 /* Map Free */
+
 void
 hmap_node_free(hmap_node_t* head)
 {
@@ -167,10 +142,6 @@ hmap_node_free(hmap_node_t* head)
 void
 hmap_free(hmap_t *hmap)
 {
-	if(!hmap) {
-		return;
-	}
-
 	for(int i = 0; i<hmap->cap; i++) {
 		hmap_node_free(hmap->arr[i]);
 		hmap->arr[i] = NULL;
@@ -179,11 +150,12 @@ hmap_free(hmap_t *hmap)
 }
 
 /* Iterator */
+
 hmap_node_t*
 hmap_itr_adv(hmap_itr_t *itr)
 {
 	// Empty Map or Iterator
-	if(!itr || hmap_empty(itr->map)) {
+	if(hmap_empty(itr->map)) {
 		return NULL;
 	}
 
@@ -233,21 +205,14 @@ hmap_itr_adv(hmap_itr_t *itr)
 	}
 }
 
-// TODO: itr_prev, and a better logic for itr_adv
-
-hmap_itr_t*
-hmap_itr_new(hmap_t *hmap)
+void
+hmap_itr_new(hmap_itr_t *itr, hmap_t *hmap)
 {
-	if(!hmap) {
-		return NULL;
-	}
+	itr->index = hmap->cap;
+	// Setting it as cap to signify no assignment of itr
 
-	hmap_itr_t *itr = malloc(sizeof(hmap_itr_t));
-	itr->index = hmap->cap; // Setting it as cap to signify no assignment of itr
 	itr->map = hmap;
 	itr->last = NULL;
-
-	return itr;
 }
 
 /* Print */
@@ -266,6 +231,7 @@ void
 hmap_print(hmap_t *hmap)
 {
 	if(!hmap) {
+		printf("HMap uninitialized.\n");
 		return;
 	}
 
