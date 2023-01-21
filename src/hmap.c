@@ -146,7 +146,7 @@ hmap_free(hmap_t *hmap)
 		hmap_node_free(hmap->arr[i]);
 		hmap->arr[i] = NULL;
 	}
-	free(hmap);
+	free(hmap->arr);
 }
 
 /* Iterator */
@@ -154,7 +154,7 @@ hmap_free(hmap_t *hmap)
 hmap_node_t*
 hmap_itr_adv(hmap_itr_t *itr)
 {
-	// Empty Map or Iterator
+	// Empty Map
 	if(hmap_empty(itr->map)) {
 		return NULL;
 	}
