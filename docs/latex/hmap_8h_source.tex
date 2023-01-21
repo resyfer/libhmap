@@ -1,0 +1,53 @@
+\hypertarget{hmap_8h_source}{}\doxysection{hmap.\+h}
+\label{hmap_8h_source}\index{include/hmap.h@{include/hmap.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#ifndef \_\_LIBHMAP\_H}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#define \_\_LIBHMAP\_H}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#include <sys/types.h>}}
+\DoxyCodeLine{5 \textcolor{preprocessor}{\#include <stdbool.h>}}
+\DoxyCodeLine{6 }
+\DoxyCodeLine{20 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structhmap__node__t}{hmap\_node\_t}} \{}
+\DoxyCodeLine{21     \textcolor{keywordtype}{char} *\mbox{\hyperlink{structhmap__node__t_a1679f6f8f7b18ba876ef8f8f36f78bc7}{key}}; }
+\DoxyCodeLine{22     \textcolor{keywordtype}{void} *\mbox{\hyperlink{structhmap__node__t_a48db06fffc8132a84e16648c88ee4573}{value}}; }
+\DoxyCodeLine{23     \textcolor{keyword}{struct }\mbox{\hyperlink{structhmap__node__t}{hmap\_node\_t}}* \mbox{\hyperlink{structhmap__node__t_a5b9241f08ac9c59a466d3556ea26bdb4}{next}}; }
+\DoxyCodeLine{24 \} \mbox{\hyperlink{structhmap__node__t}{hmap\_node\_t}};}
+\DoxyCodeLine{25 }
+\DoxyCodeLine{31 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\{}
+\DoxyCodeLine{32     \mbox{\hyperlink{structhmap__node__t}{hmap\_node\_t}} **\mbox{\hyperlink{structhmap__t_ac8f31adae9ed4c5f6cd7f36b9b26c3c5}{arr}}; }
+\DoxyCodeLine{34     u\_int8\_t \mbox{\hyperlink{structhmap__t_ae967a5e7fe4414c842c7c2a7480337fa}{cap}}; }
+\DoxyCodeLine{36     u\_int32\_t \mbox{\hyperlink{structhmap__t_a72cde277a978132132ce17396822b138}{size}}; }
+\DoxyCodeLine{37 \} \mbox{\hyperlink{structhmap__t}{hmap\_t}};}
+\DoxyCodeLine{38 }
+\DoxyCodeLine{42 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\{}
+\DoxyCodeLine{43     \mbox{\hyperlink{structhmap__t}{hmap\_t}} *\mbox{\hyperlink{structhmap__itr__t_ab77aa8509ae00046e0c4dabbf5a6ca0b}{map}}; }
+\DoxyCodeLine{44     u\_int8\_t \mbox{\hyperlink{structhmap__itr__t_ae553a9928c7b45e80d446f2c152f925e}{index}}; }
+\DoxyCodeLine{46     \mbox{\hyperlink{structhmap__node__t}{hmap\_node\_t}}* \mbox{\hyperlink{structhmap__itr__t_ab3fc59a0b101b8a022f8bef0378b6327}{last}}; }
+\DoxyCodeLine{47 \} \mbox{\hyperlink{structhmap__itr__t}{hmap\_itr\_t}};}
+\DoxyCodeLine{48 }
+\DoxyCodeLine{54 \textcolor{keywordtype}{void} hmap\_new(\mbox{\hyperlink{structhmap__t}{hmap\_t}} *hmap);}
+\DoxyCodeLine{55 }
+\DoxyCodeLine{66 \textcolor{keywordtype}{void} hmap\_new\_cap(\mbox{\hyperlink{structhmap__t}{hmap\_t}} *hmap, u\_int8\_t cap);}
+\DoxyCodeLine{67 }
+\DoxyCodeLine{75 \textcolor{keywordtype}{void}* hmap\_get(\mbox{\hyperlink{structhmap__t}{hmap\_t}} *hmap, \textcolor{keyword}{const} \textcolor{keywordtype}{char} *key);}
+\DoxyCodeLine{76 }
+\DoxyCodeLine{84 \textcolor{keywordtype}{void} hmap\_push(\mbox{\hyperlink{structhmap__t}{hmap\_t}} *hmap, \textcolor{keyword}{const} \textcolor{keywordtype}{char} *key, \textcolor{keywordtype}{void} *value);}
+\DoxyCodeLine{85 }
+\DoxyCodeLine{92 \textcolor{keywordtype}{void} hmap\_remove(\mbox{\hyperlink{structhmap__t}{hmap\_t}} *hmap, \textcolor{keyword}{const} \textcolor{keywordtype}{char} *key);}
+\DoxyCodeLine{93 }
+\DoxyCodeLine{101 \textcolor{keywordtype}{bool} hmap\_empty(\mbox{\hyperlink{structhmap__t}{hmap\_t}} *hmap);}
+\DoxyCodeLine{102 }
+\DoxyCodeLine{103 \textcolor{comment}{/* Iterator */}}
+\DoxyCodeLine{104 }
+\DoxyCodeLine{111 \textcolor{keywordtype}{void} hmap\_itr\_new(\mbox{\hyperlink{structhmap__itr__t}{hmap\_itr\_t}} *itr, \mbox{\hyperlink{structhmap__t}{hmap\_t}} *hmap);}
+\DoxyCodeLine{112 }
+\DoxyCodeLine{124 \mbox{\hyperlink{structhmap__node__t}{hmap\_node\_t}}* hmap\_itr\_adv(\mbox{\hyperlink{structhmap__itr__t}{hmap\_itr\_t}} *itr);}
+\DoxyCodeLine{125 }
+\DoxyCodeLine{132 \textcolor{keywordtype}{void} hmap\_free(\mbox{\hyperlink{structhmap__t}{hmap\_t}} *hmap);}
+\DoxyCodeLine{133 }
+\DoxyCodeLine{139 \textcolor{keywordtype}{void} hmap\_print(\mbox{\hyperlink{structhmap__t}{hmap\_t}} *hmap);}
+\DoxyCodeLine{140 }
+\DoxyCodeLine{141 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -5,6 +5,14 @@
 #include <stdbool.h>
 
 /**
+ * @mainpage
+ * A hash map library for C. It hashes the key in a fair and fast manner
+ * to decide which linked list to put the value in, and thus pushing values
+ * as well as retrieving values from the hash map takes the average O(1) time
+ * complexities.
+ */
+
+/**
  * @brief Hash map's elemental block
  *
  * Bsaically a singly linked list
