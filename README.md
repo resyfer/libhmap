@@ -12,6 +12,11 @@ Make sure to have [make](https://www.gnu.org/software/make/),
 [gcc](https://www.gnu.org/software/gcc/) and [git](https://git-scm.com/)
 installed.
 
+Then, make sure all the following dependencies are installed:
+- [libcol](https://github.com/resyfer/libcol)
+
+Then install the library:
+
 ```bash
 git clone https://github.com/resyfer/libhmap.git
 cd libhmap

@@ -55,7 +55,7 @@ test: install
 	@./$(TEST_DIR)/$(TEST).o
 
 run: install
-	@$(CC) $(CFLAGS) -o ./$(EXAMPLE_DIR)/$(TEST).o ./$(EXAMPLE_DIR)/$(EXAMPLE).c $(LD_FLAGS)
+	@$(CC) $(CFLAGS) -o ./$(EXAMPLE_DIR)/$(EXAMPLE).o ./$(EXAMPLE_DIR)/$(EXAMPLE).c $(LD_FLAGS)
 	@echo "------------"
 	@./$(EXAMPLE_DIR)/$(TEST).o
 
